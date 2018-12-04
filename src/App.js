@@ -10,9 +10,9 @@ import Particles from 'react-particles-js';
 import Clarifai from 'clarifai';
 import './App.css';
 
-  const app = new Clarifai.App({
-   apiKey: '0eeff62927394e65af1c6b2d96038bbc'
-  });
+const app = new Clarifai.App({
+ apiKey: '0eeff62927394e65af1c6b2d96038bbc'
+});
 
 const  param = {
 particles: {
@@ -46,11 +46,32 @@ class App extends Component {
       url: '',
       box: [],
       route: 'signin',
-      isSignedIN: false
+      isSignedIN: false,
+      user: {
+        id : '',
+        name : '',
+        email : '',
+        entries: 0,
+        joined : new Date()
+      }
     }
   }
 
+  loadUser = (data) => {
+    this.setState({ 
+      user : {
+        id : data.id,
+        name : data.name,
+        email : data.email,
+        entries: data.entries,
+        joined : data.joined
+      }, 
+      url : ''});
+    console.log(this.state.user);
+  }
+
   calculateFaceLocation = (response) => {
+    console.log(response);
     const clarifaiFace = response.outputs[0].data.regions;
     const image = document.getElementById('imageSource');
     const width = Number(image.width);
@@ -63,7 +84,6 @@ class App extends Component {
         bottom: height - (region.region_info.bounding_box.bottom_row * height),
       });
     })
-    console.log(arrayOfBoxes);
     this.setState({box: arrayOfBoxes});
   }
 
@@ -76,9 +96,23 @@ class App extends Component {
     this.setState({url: this.state.input}); 
     app.models.predict(Clarifai.FACE_DETECT_MODEL, this.state.input)
     .then(response => {
-      console.log(response);
       this.calculateFaceLocation(response);
-     } )
+      if(response) {
+        fetch('http://localhost:3003/image', {
+          method : 'put',
+          headers : {
+            'Content-Type' : 'application/json'
+          },
+          body : JSON.stringify({
+            id : this.state.user.id
+          })
+        })
+        .then(response => response.json())
+        .then(count => {
+          this.setState(Object.assign(this.state.user, { entries : count }));
+        })
+      }
+      })
     .catch((err) => console.log(err, 'Error in Code'));
     this.setState({input: ''});
   }
@@ -93,22 +127,22 @@ class App extends Component {
   render() {
     const { input, url, box, isSignedIN } = this.state;
     return (
-      <div className="App">
-        <Particles className='particles' params={param}/>
-        <Navigation onRouteChange={this.onRouteChange} isSignedIN={isSignedIN} />
+      <div className = "App">
+        <Particles className = 'particles' params = {param}/>
+        <Navigation onRouteChange = {this.onRouteChange} isSignedIN = {isSignedIN} />
         {
           (this.state.route === 'signin')
-          ? <SignIn onRouteChange={this.onRouteChange} />
+          ? <SignIn onRouteChange={this.onRouteChange} onLoadUser = {this.loadUser} />
           : (
             (this.state.route === 'home')
             ? <div>
                 <Logo />
-                <Rank />
+                <Rank name = {this.state.user.name} entries = {this.state.user.entries}/>
                 <InputForm onInputChange={this.onInputChange} value={input}
                 onSubmit={this.onSubmit} />
-                <FaceRecognition imageUrl={url} boxes={box} />
+                <FaceRecognition imageUrl = {url} boxes = {box} />
               </div>
-            : <Register onRouteChange={this.onRouteChange} />)
+            : <Register onRouteChange = {this.onRouteChange} onLoadUser = {this.loadUser} />)
         }
       </div>
     );
