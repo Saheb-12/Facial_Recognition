@@ -44,7 +44,7 @@ class Register extends React.Component {
 					this.props.onLoadUser(data);
 					this.props.onRouteChange('home');
 				}
-			}).catch(err => console.log(err, "Error in Register.js"));
+			}).catch(err => console.log(err, "Error in Register"));
 /*		} else {
 			alert('Enter valid Details');
 		}*/
