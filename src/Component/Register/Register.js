@@ -23,24 +23,31 @@ class Register extends React.Component {
 	}
 
 	onRegister = () => {
-		fetch('http://localhost:3003/register',{
-			method: 'post',
-			headers: {
-				'Content-type': 'application/json'
-			},
-			body: JSON.stringify({
-				name: this.state.name,
-				email: this.state.email,
-				password: this.state.password
+/*		const emailFormat = /^([a-z\d\.-]+)@([a-z]+)\.([a-z]{2,8})([a-z]{2,8})?$/;
+		const nameFormat = /^([\w]+)$/;
+		const passwordFormat = /^([(a-z)+(A-Z)+(0-9)+]+)$/;
+		if(emailFormat.test(this.state.email) || passwordFormat.test(event.target.value) || nameFormat.test(event.target.value)){*/
+			fetch('https://polar-cove-77096.herokuapp.com/register',{
+				method: 'post',
+				headers: {
+					'Content-type': 'application/json'
+				},
+				body: JSON.stringify({
+					name: this.state.name,
+					email: this.state.email,
+					password: this.state.password
+				})
 			})
-		})
-		.then(response => response.json())
-		.then(data => {
-			if(data.id){
-				this.props.onLoadUser(data);
-				this.props.onRouteChange('home');
-			}
-		}).catch(err => console.log(err, "Error in Register.js"));
+			.then(response => response.json())
+			.then(data => {
+				if(data.id){
+					this.props.onLoadUser(data);
+					this.props.onRouteChange('home');
+				}
+			}).catch(err => console.log(err, "Error in Register.js"));
+/*		} else {
+			alert('Enter valid Details');
+		}*/
 	}
 
 	render() {

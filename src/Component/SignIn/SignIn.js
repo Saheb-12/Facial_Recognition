@@ -18,7 +18,7 @@ class SignIn extends Component {
 	}
 
 	onSignIn = () => {
-		fetch('http://localhost:3003/signIn', {
+		fetch('https://polar-cove-77096.herokuapp.com/signIn', {
 			method: 'post',
 			headers: {
 				'Content-Type' : 'application/json'
